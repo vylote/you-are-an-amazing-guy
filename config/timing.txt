@@ -1,0 +1,30 @@
+# File cau hinh do tre (ms) cho tung buoc animation cua TierBoard.
+# Moi dong = do tre TRUOC KHI thuc hien 1 buoc truot (1 hang) hoac 1 lan chuyen pha.
+# Dong bat dau bang '#' hoac dong trong se bi bo qua.
+# Neu so buoc animation nhieu hon so dong o day, cac buoc du se lap lai gia tri cuoi cung.
+#
+# Thu tu buoc voi bang 5 hang (Acceptance, Hope, Struggle, Doubt, Lost):
+#   Buoc 1-4: anh A truot tu hang 0 xuong hang 4
+#   Buoc 5  : B xuat hien tai hang 0 (thoi diem "doi pha")
+#   Buoc 6-9: anh B truot tu hang 0 xuong hang 4
+#   Buoc 10 : chuyen sang pha ca 2 cung di len (khong di chuyen, chi doi pha)
+#   Buoc 11-14: ca A va B cung truot tu hang 4 len hang 0
+
+120
+600
+600
+600
+#buoc 5
+300
+#buoc 6-9
+610
+610
+610
+700
+#buoc 10
+400
+#buoc 11-14
+560
+560
+560
+560

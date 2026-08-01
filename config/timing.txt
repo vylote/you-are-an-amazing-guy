@@ -10,21 +10,21 @@
 #   Buoc 10 : chuyen sang pha ca 2 cung di len (khong di chuyen, chi doi pha)
 #   Buoc 11-14: ca A va B cung truot tu hang 4 len hang 0
 
-120
 600
-600
-600
-#buoc 5
 300
+300
+300
+#buoc 5
+200
 #buoc 6-9
-610
-610
-610
-700
+300
+300
+300
+300
 #buoc 10
-400
+100
 #buoc 11-14
-560
-560
-560
-560
+350
+320
+320
+320

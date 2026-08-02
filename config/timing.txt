@@ -11,18 +11,18 @@
 #   Buoc 11-14: ca A va B cung truot tu hang 4 len hang 0
 
 600
-200
-200
-200
+400
+400
+400
 #buoc 5
 200
 #buoc 6-9
 270
 270
 270
-190
+140
 #buoc 10
-100
+0
 #buoc 11-14
 140
 360

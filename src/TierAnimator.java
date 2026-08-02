@@ -23,7 +23,7 @@ public class TierAnimator {
     private static final double HORIZONTAL_MARGIN = 20;         // le sau mep phai anh xa nhat can thay
 
     // ==== 2 THONG SO QUYET DINH TOC DO - CHINH O DAY ====
-    private static final int MOVE_DURATION_MS = 350;
+    private static final int MOVE_DURATION_MS = 260;
     private static final int ZOOM_TRANSITION_MS = 260;
     // ============================================
 
@@ -41,9 +41,14 @@ public class TierAnimator {
     private int currentRow;
     private int stepIndex;
 
+    private static final double SHAKE_AMPLITUDE = 50;       // bien do rung toi da (world units)
+    private static final double SHAKE_FREQUENCY_HZ = 2;    // TOC DO RUNG - so nhip rung/giay, giam so nay de rung cham hon
+
     private double currentZoom = 1.0;
     private double currentFocusX;
     private double currentFocusY;
+    private double shakeOffsetX = 0; // offset rung cong THEM vao tieu diem khi ap dung camera, khong lam ban currentFocusX/Y
+    private double shakeOffsetY = 0;
 
     public TierAnimator(BoardCanvas canvas, Camera camera, AnimationConfig config, int totalRows) {
         this.canvas = canvas;
@@ -80,7 +85,7 @@ public class TierAnimator {
     }
 
     private void applyCamera() {
-        camera.setFocus(currentFocusX, currentFocusY);
+        camera.setFocus(currentFocusX + shakeOffsetX, currentFocusY + shakeOffsetY);
         camera.setZoom(currentZoom);
         canvas.repaint();
     }
@@ -102,7 +107,7 @@ public class TierAnimator {
                     // Chi can thay den het cot A (cot 0) trong pha nay
                     double zoomTarget = capZoomToShowColumn(desiredVertical, 0);
                     animateMove(true, false, currentRow, toRow, zoomTarget,
-                            focusXForZoom(zoomTarget), canvas.rowCenterY(toRow));
+                            focusXForZoom(zoomTarget), canvas.rowCenterY(toRow), false);
                 } else {
                     currentRow = 0;
                     canvas.setVisibleB(true);
@@ -122,7 +127,7 @@ public class TierAnimator {
                     double focusY = canvas.rowCenterY(midRow(lastRow, toRow));
                     // Phai thay den het cot B (cot 1) - vi cot 1 nam ben phai cot 0 nen A cung tu dong lot vao
                     double zoomTarget = capZoomToShowColumn(desiredVertical, 1);
-                    animateMove(false, true, currentRow, toRow, zoomTarget, focusXForZoom(zoomTarget), focusY);
+                    animateMove(false, true, currentRow, toRow, zoomTarget, focusXForZoom(zoomTarget), focusY, false);
                 } else {
                     phase = Phase.BOTH_UP;
                     // KHONG zoom ra - chi pan ngang sang tieu diem "thay ca 2 cot", zoom giu nguyen
@@ -133,9 +138,9 @@ public class TierAnimator {
             case BOTH_UP:
                 if (currentRow > 0) {
                     int toRow = currentRow - 1;
-                    // Zoom giu nguyen (khong doi) suot ca luot nay
+                    // Zoom giu nguyen (khong doi) suot ca luot nay; BAT camera shake luc dang truot len
                     animateMove(true, true, currentRow, toRow, currentZoom,
-                            focusXForZoom(currentZoom), canvas.rowCenterY(toRow));
+                            focusXForZoom(currentZoom), canvas.rowCenterY(toRow), true);
                 } else {
                     phase = Phase.DONE;
                     animateZoomOut();
@@ -185,7 +190,7 @@ public class TierAnimator {
     }
 
     private void animateMove(boolean moveA, boolean moveB, int fromRow, int toRow,
-                              double zoomTarget, double focusXTarget, double focusYTarget) {
+                              double zoomTarget, double focusXTarget, double focusYTarget, boolean shake) {
         long startTime = System.currentTimeMillis();
         double zoomFrom = currentZoom;
         double focusXFrom = currentFocusX;
@@ -204,6 +209,20 @@ public class TierAnimator {
             currentZoom = zoomFrom + (zoomTarget - zoomFrom) * eased;
             currentFocusX = focusXFrom + (focusXTarget - focusXFrom) * eased;
             currentFocusY = focusYFrom + (focusYTarget - focusYFrom) * eased;
+
+            if (shake) {
+                // Rung theo hinh sin voi tan so co dinh (SHAKE_FREQUENCY_HZ) - muot va co "toc do"
+                // ro rang de chinh, thay vi doi huong ngau nhien moi frame (kho chinh nhanh/cham).
+                double elapsedMs = System.currentTimeMillis() - startTime;
+                double decay = 1.0 - t; // rung manh nhat luc vua bat dau truot, tat dan ve 0 khi sap dung
+                double phase = elapsedMs / 1000.0 * SHAKE_FREQUENCY_HZ * 2 * Math.PI;
+                shakeOffsetX = SHAKE_AMPLITUDE * decay * Math.sin(phase);
+                shakeOffsetY = SHAKE_AMPLITUDE * decay * Math.sin(phase * 1.3 + 1.0); // lech pha/tan so nhe de khong rung theo duong thang cheo
+            } else {
+                shakeOffsetX = 0;
+                shakeOffsetY = 0;
+            }
+
             applyCamera();
 
             if (t >= 1.0) {
@@ -214,6 +233,8 @@ public class TierAnimator {
                 currentZoom = zoomTarget;
                 currentFocusX = focusXTarget;
                 currentFocusY = focusYTarget;
+                shakeOffsetX = 0;
+                shakeOffsetY = 0;
                 advanceStep();
             }
         });

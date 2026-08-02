@@ -23,7 +23,7 @@ public class TierAnimator {
     private static final double HORIZONTAL_MARGIN = 20;         // le sau mep phai anh xa nhat can thay
 
     // ==== 2 THONG SO QUYET DINH TOC DO - CHINH O DAY ====
-    private static final int MOVE_DURATION_MS = 260;
+    private static final int MOVE_DURATION_MS = 300;
     private static final int ZOOM_TRANSITION_MS = 260;
     // ============================================
 
@@ -34,8 +34,11 @@ public class TierAnimator {
     private final AnimationConfig config;
     private final int totalRows;
 
+    private static final int FLASH_DURATION_MS = 500; // "nhay trang" nhanh - giam/tang de nhanh/cham hon
+
     private Timer waitTimer;
     private Timer animTimer;
+    private Timer flashTimer;
 
     private Phase phase;
     private int currentRow;
@@ -82,6 +85,7 @@ public class TierAnimator {
     private void stopAllTimers() {
         if (waitTimer != null) { waitTimer.stop(); waitTimer = null; }
         if (animTimer != null) { animTimer.stop(); animTimer = null; }
+        if (flashTimer != null) { flashTimer.stop(); flashTimer = null; }
     }
 
     private void applyCamera() {
@@ -130,6 +134,7 @@ public class TierAnimator {
                     animateMove(false, true, currentRow, toRow, zoomTarget, focusXForZoom(zoomTarget), focusY, false);
                 } else {
                     phase = Phase.BOTH_UP;
+                    triggerFlash(); // nhay trang nhanh, chay SONG SONG voi pan ben duoi (khong chan)
                     // KHONG zoom ra - chi pan ngang sang tieu diem "thay ca 2 cot", zoom giu nguyen
                     animatePan(focusXForZoom(currentZoom), currentFocusY);
                 }
@@ -187,6 +192,24 @@ public class TierAnimator {
     /** Neo mep trai khung nhin dung tai x=0 (het label) voi zoom da cho truoc. */
     private double focusXForZoom(double zoom) {
         return canvas.getWidth() / (2.0 * zoom);
+    }
+
+    /** Nhay trang nhanh (lop phu), chay doc lap - khong can tro cac timer khac (vd animatePan). */
+    private void triggerFlash() {
+        long startTime = System.currentTimeMillis();
+        if (flashTimer != null) flashTimer.stop();
+        flashTimer = new Timer(FRAME_INTERVAL_MS, null);
+        flashTimer.addActionListener(e -> {
+            double t = Math.min(1.0, (System.currentTimeMillis() - startTime) / (double) FLASH_DURATION_MS);
+            double alpha = 1.0 - t; // trang toi da luc bat dau, mo dan ve 0
+            canvas.setFlashAlpha(alpha);
+            canvas.repaint();
+            if (t >= 1.0) {
+                flashTimer.stop();
+                canvas.setFlashAlpha(0);
+            }
+        });
+        flashTimer.start();
     }
 
     private void animateMove(boolean moveA, boolean moveB, int fromRow, int toRow,

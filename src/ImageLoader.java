@@ -13,6 +13,22 @@ import java.io.IOException;
  */
 public class ImageLoader {
 
+    /** Doc anh tu duong dan, GIU NGUYEN kich thuoc/ty le goc (khong letterbox, khong crop).
+     *  Dung khi noi ve se tu keo gian anh nay khop o cua no (co the bi meo neu ty le
+     *  o khac ty le anh goc, nhung se khong con khoang trong/margin trai-phai). */
+    public static Image loadRaw(String path) {
+        try {
+            BufferedImage original = ImageIO.read(new File(path));
+            if (original == null) {
+                throw new IOException("Khong doc duoc anh: " + path);
+            }
+            return original;
+        } catch (IOException e) {
+            System.err.println("[ImageLoader] " + e.getMessage() + " -> dung anh placeholder.");
+            return placeholder(256, new Color(120, 120, 120), "?").getImage();
+        }
+    }
+
     /** Doc anh tu duong dan, co gian vua khop hinh vuong size x size, giu ti le (letterbox). */
     public static ImageIcon loadScaled(String path, int size) {
         try {

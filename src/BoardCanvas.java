@@ -14,10 +14,9 @@ import java.util.List;
 public class BoardCanvas extends JPanel {
 
     public static final int LABEL_COL_WIDTH = 150;
-    private static final int IMG_MARGIN = 8;         // le giua anh va canh o cua no
     private static final int IMG_GAP = 12;            // khoang cach giua 2 o anh (de "sat nhau")
     private static final int LEFT_MARGIN_AFTER_LABEL = 20; // khoang trong giua label va o anh dau tien
-    private static final double CELL_SIZE_RATIO = 0.8; // kich thuoc o anh = rowHeight * ty le nay
+    private static final double CELL_SIZE_RATIO = 0.8; // be rong o anh = rowHeight * ty le nay (chieu cao anh = full rowHeight, khong con le tren/duoi)
 
     private final List<Tier> tiers;
     private final Image imageA;
@@ -62,6 +61,11 @@ public class BoardCanvas extends JPanel {
     /** Tam X giua 2 o anh - dung lam tieu diem camera khi ca 2 anh cung dang di chuyen. */
     public double imagesMidpointX() {
         return (colCenterX(0) + colCenterX(1)) / 2.0;
+    }
+
+    /** Mep phai cua o anh thu columnIndex - dung de tinh zoom/focus dam bao thay het anh nay. */
+    public double rightEdgeOfColumn(int columnIndex) {
+        return colCenterX(columnIndex) + cellSize() / 2.0;
     }
 
     public void setRowA(double row) {
@@ -127,8 +131,9 @@ public class BoardCanvas extends JPanel {
     private void drawImage(Graphics2D g2, Image img, double row, int col) {
         double cx = colCenterX(col);
         double cy = rowCenterY(row);
-        double size = cellSize() - IMG_MARGIN * 2.0;
-        g2.drawImage(img, (int) Math.round(cx - size / 2), (int) Math.round(cy - size / 2),
-                (int) Math.round(size), (int) Math.round(size), null);
+        double w = cellSize();
+        double h = rowHeight();
+        g2.drawImage(img, (int) Math.round(cx - w / 2), (int) Math.round(cy - h / 2),
+                (int) Math.round(w), (int) Math.round(h), null);
     }
 }

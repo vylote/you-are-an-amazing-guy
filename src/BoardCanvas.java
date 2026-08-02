@@ -16,7 +16,7 @@ public class BoardCanvas extends JPanel {
     public static final int LABEL_COL_WIDTH = 150;
     private static final int IMG_GAP = 12;            // khoang cach giua 2 o anh (de "sat nhau")
     private static final int LEFT_MARGIN_AFTER_LABEL = 20; // khoang trong giua label va o anh dau tien
-    private static final double CELL_SIZE_RATIO = 0.8; // be rong o anh = rowHeight * ty le nay (chieu cao anh = full rowHeight, khong con le tren/duoi)
+    private static final double CELL_SIZE_RATIO = 0.8; // canh o vuong = rowHeight * ty le nay
 
     private final List<Tier> tiers;
     private final Image imageA;
@@ -30,8 +30,8 @@ public class BoardCanvas extends JPanel {
 
     public BoardCanvas(List<Tier> tiers, String imagePathA, String imagePathB, Camera camera) {
         this.tiers = tiers;
-        this.imageA = ImageLoader.loadScaled(imagePathA, 256).getImage();
-        this.imageB = ImageLoader.loadScaled(imagePathB, 256).getImage();
+        this.imageA = ImageLoader.loadRaw(imagePathA);
+        this.imageB = ImageLoader.loadRaw(imagePathB);
         this.camera = camera;
         setBackground(new Color(20, 20, 18));
     }
@@ -128,11 +128,21 @@ public class BoardCanvas extends JPanel {
         g2.draw(new Rectangle2D.Double(0, 0, width - 1, totalHeight - 1));
     }
 
+    /** Ve anh trong 1 o VUONG (cellSize x cellSize), giu nguyen ty le anh goc - khong con
+     *  keo meo nua. Neu anh khong vuong, phan du se de trong (letterbox) thay vi keo gian. */
     private void drawImage(Graphics2D g2, Image img, double row, int col) {
         double cx = colCenterX(col);
         double cy = rowCenterY(row);
-        double w = cellSize();
-        double h = rowHeight();
+        double cell = cellSize();
+
+        int iw = img.getWidth(null);
+        int ih = img.getHeight(null);
+        if (iw <= 0 || ih <= 0) return;
+
+        double scale = Math.min(cell / iw, cell / ih);
+        double w = iw * scale;
+        double h = ih * scale;
+
         g2.drawImage(img, (int) Math.round(cx - w / 2), (int) Math.round(cy - h / 2),
                 (int) Math.round(w), (int) Math.round(h), null);
     }

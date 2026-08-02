@@ -23,7 +23,7 @@ public class TierAnimator {
     private static final double HORIZONTAL_MARGIN = 20;         // le sau mep phai anh xa nhat can thay
 
     // ==== 2 THONG SO QUYET DINH TOC DO - CHINH O DAY ====
-    private static final int MOVE_DURATION_MS = 260;
+    private static final int MOVE_DURATION_MS = 350;
     private static final int ZOOM_TRANSITION_MS = 260;
     // ============================================
 

@@ -27,6 +27,7 @@ public class BoardCanvas extends JPanel {
     private double rowB = 0;
     private boolean visibleA = true;
     private boolean visibleB = false;
+    private double flashAlpha = 0; // do trong cua lop phu trang (0 = khong thay, 1 = trang hoan toan)
 
     public BoardCanvas(List<Tier> tiers, String imagePathA, String imagePathB, Camera camera) {
         this.tiers = tiers;
@@ -84,6 +85,11 @@ public class BoardCanvas extends JPanel {
         this.visibleB = v;
     }
 
+    /** Do trong cua lop phu trang toan man hinh (0..1). Dung cho hieu ung "nhay trang" nhanh. */
+    public void setFlashAlpha(double alpha) {
+        this.flashAlpha = Math.max(0, Math.min(1, alpha));
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -97,6 +103,13 @@ public class BoardCanvas extends JPanel {
             if (visibleB) drawImage(g2, imageB, rowB, 1);
         } finally {
             g2.dispose();
+        }
+
+        // Lop phu trang - VE BANG raw (khong qua camera), vi day la hieu ung toan man hinh,
+        // khong phai mot phan cua "the gioi" dang bi zoom/pan.
+        if (flashAlpha > 0) {
+            raw.setColor(new Color(1f, 1f, 1f, (float) flashAlpha));
+            raw.fillRect(0, 0, getWidth(), getHeight());
         }
     }
 
